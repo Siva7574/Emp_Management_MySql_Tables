@@ -122,6 +122,9 @@ VALUES ('admin', 'Admin@123', 1),
 ('employee2', 'Emp@456', 3),
 ('manager1', 'Mgr@123', 2);
 
+
+--EmployeeAttendance and EmployeeSalaryHistory queries are run after creating the atleast 3 records of employees from the froentend application
+
 INSERT INTO EmployeeAttendance
 (EmployeeID, AttendanceDate, CheckInTime, CheckOutTime, Status)
 VALUES
@@ -151,4 +154,5 @@ VALUES
 
 (3, '2024-01-01', 60000.00),
 (3, '2025-01-01', 65000.00),
+
 (3, '2026-01-01', 70000.00);
