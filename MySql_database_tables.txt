@@ -1,0 +1,154 @@
+-- Use your database first
+CREATE DATABASE IF NOT EXISTS Wisdom;
+USE Wisdom;
+
+-- ROLES TABLE
+CREATE TABLE Roles (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    RoleName VARCHAR(50) UNIQUE NOT NULL,
+    Description VARCHAR(255),
+    CreatedOn DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedOn DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    DeletedOn DATETIME NULL
+) ENGINE=InnoDB;
+
+INSERT INTO Roles (RoleName, Description) VALUES
+('Admin', 'Full access to the system'),
+('HR', 'Manage employees and attendance'),
+('Employee', 'Basic access to personal data and attendance');
+
+
+-- USERS TABLE
+CREATE TABLE Users (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(50) UNIQUE NOT NULL,
+    Password VARCHAR(255) NOT NULL,
+    RoleID INT NOT NULL,
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedOn DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedOn DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    DeletedOn DATETIME NULL,
+    FOREIGN KEY (RoleID) REFERENCES Roles(Id)
+) ENGINE=InnoDB;
+
+
+-- TOKENS TABLE
+CREATE TABLE Tokens (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    UserId INT NOT NULL,
+    RefreshToken VARCHAR(255),
+    CreatedOn DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedOn DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    RefreshTokenExpiryTime DATETIME,
+    FOREIGN KEY (UserId) REFERENCES Users(Id)
+) ENGINE=InnoDB;
+
+
+-- DEPARTMENTS TABLE
+CREATE TABLE Departments (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    DepartmentName VARCHAR(100) UNIQUE NOT NULL,
+    Description VARCHAR(255),
+    CreatedOn DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedOn DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    DeletedOn DATETIME NULL
+) ENGINE=InnoDB;
+
+INSERT INTO Departments (DepartmentName, Description) VALUES
+('HR', 'Handles recruitment, training, and employee relations.'),
+('Finance', 'Manages budgets, payroll, and company financial planning.'),
+('IT', 'Responsible for IT infrastructure and software systems.'),
+('Marketing', 'Focuses on market research, advertising, and promotions.'),
+('Sales', 'Oversees client relations and business development.'),
+('Operations', 'Coordinates production and logistics for company activities.'),
+('Customer Support', 'Provides assistance and support to customers.'),
+('Research & Development', 'Innovates and improves products and services.');
+
+
+-- EMPLOYEES TABLE
+CREATE TABLE Employees (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT NULL,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Phone VARCHAR(20),
+    Address VARCHAR(255),
+    HireDate DATE NOT NULL,
+    Salary DECIMAL(10,2) NOT NULL,
+    DepartmentID INT,
+    CreatedOn DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedOn DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    DeletedOn DATETIME NULL,
+    FOREIGN KEY (DepartmentID) REFERENCES Departments(Id),
+    FOREIGN KEY (UserID) REFERENCES Users(Id)
+) ENGINE=InnoDB;
+
+
+-- EMPLOYEE ATTENDANCE TABLE
+CREATE TABLE EmployeeAttendance (
+    AttendanceId INT AUTO_INCREMENT PRIMARY KEY,
+    EmployeeID INT NOT NULL,
+    AttendanceDate DATE NOT NULL,
+    CheckInTime DATETIME NULL,
+    CheckOutTime DATETIME NULL,
+    Status INT NOT NULL,  -- 1=Present, 2=Absent, etc.
+    CreatedOn DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedOn DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    DeletedOn DATETIME NULL,
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(Id),
+    UNIQUE KEY UQ_EmployeeAttendance (EmployeeID, AttendanceDate)
+) ENGINE=InnoDB;
+
+
+-- EMPLOYEE SALARY HISTORY TABLE
+CREATE TABLE EmployeeSalaryHistory (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    EmployeeID INT NOT NULL,
+    EffectiveDate DATE NOT NULL,
+    Salary DECIMAL(10,2) NOT NULL,
+    CreatedOn DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedOn DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(Id)
+) ENGINE=InnoDB;
+
+
+
+INSERT INTO Users (Username, Password, RoleID)
+VALUES ('admin', 'Admin@123', 1),
+('siva@gmail.com', 'Siva@123', 3),
+('prasad@gmail.com','Prasad@123',3),
+('employee1', 'Emp@123', 3),
+('employee2', 'Emp@456', 3),
+('manager1', 'Mgr@123', 2);
+
+INSERT INTO EmployeeAttendance
+(EmployeeID, AttendanceDate, CheckInTime, CheckOutTime, Status)
+VALUES
+(1, '2026-01-01', '2026-01-01 09:05:00', '2026-01-01 18:00:00', 1),
+(1, '2026-01-02', '2026-01-02 09:10:00', '2026-01-02 18:05:00', 1),
+(1, '2026-01-03', NULL, NULL, 2),
+
+(2, '2026-01-01', '2026-01-01 09:00:00', '2026-01-01 17:45:00', 1),
+(2, '2026-01-02', '2026-01-02 09:15:00', '2026-01-02 18:10:00', 1),
+(2, '2026-01-03', NULL, NULL, 2),
+
+(3, '2026-01-01', '2026-01-01 09:20:00', '2026-01-01 18:30:00', 1),
+(3, '2026-01-02', '2026-01-02 09:05:00', '2026-01-02 18:00:00', 1),
+(3, '2026-01-03', '2026-01-03 09:00:00', '2026-01-03 17:50:00', 1);
+
+
+INSERT INTO EmployeeSalaryHistory
+(EmployeeID, EffectiveDate, Salary)
+VALUES
+(1, '2024-01-01', 45000.00),
+(1, '2025-01-01', 50000.00),
+(1, '2026-01-01', 55000.00),
+
+(2, '2024-01-01', 40000.00),
+(2, '2025-01-01', 45000.00),
+(2, '2026-01-01', 48000.00),
+
+(3, '2024-01-01', 60000.00),
+(3, '2025-01-01', 65000.00),
+(3, '2026-01-01', 70000.00);
